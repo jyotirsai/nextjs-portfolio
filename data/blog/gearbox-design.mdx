@@ -1,0 +1,32 @@
+---
+title: Gearbox Design
+date: '2021-05-2'
+tags: ['Engineering', 'Design']
+draft: false
+summary: Summary of a gearbox made for a 3rd year mechanical design class.
+---
+
+<img src="/static/images/gearbox.png" />
+
+For a mechanical design class, I, along with 5 other group members designed a 5 speed manual transmission. The design consisted of shafts, gears, bearings,
+dog clutches, and a shifter mechanism. Initially, gear ratios were developed for a given race course which led to shaft and gear analysis. Shaft analysis indicated the
+minimum acceptable diameter of the shaft at each step in order to prevent failure and excessive deflection. Stresses on the gears were analyzed and stock gears
+were selected from manufacturer catalogues. Bearings were used to support the loads on the shafts, and were also selected from a catalogue.
+Further analysis on keyways, splines, and dog clutches were also completed.
+
+My main responsibilities for the project were shaft and bearing analysis, and designing the shifter mechanism. For the shaft analysis, singularity functions were
+developed to find the maximum and minimum moments on the shafts. Subsequently, the corrected endurance strength was calculated and the D.E. elliptic equation was
+used to calculate the minimum diameter. The moment of inertia was then calculated with this diameter and was used to find the angular and linear deflections of the shaft.
+The deflections were evaluated against the D.E. elliptic criterion to determine if they were acceptable. If not, either the material of the shaft or the spacing of
+the gears would have to be changed (or both). The bearing analysis involved finding the largest resultant reaction force on the shaft, and using this value as the
+the dynamic load rating for the bearing. No thrust loads were assumed since only spur gears were used in the design. An H-pattern shifting mechanism was designed for the transmission
+which included gear selector forks, selector rods, a shifter housing, and a shift lever. The aforementioned parts were designed in SolidWorks.
+
+So how does the gearbox actually work? The engine rotates an input shaft which has a gear that is in mesh with another gear on a countershaft. The countershaft
+has 5 gears each in mesh with another 5 gears on the output shaft. In other words, the gears are in constant mesh. The gears sit on bushings which allow them to freely rotate (without rotating the shaft they sit on).
+Each gear represents a different gear ratio that will rotate the output shaft at a certain rpm. Typically, the first gear will have the highest torque but the slowest
+speed while the last gear will have the least torque but the highest speed. Dog clutches are attached to the shaft and rotate along with the shaft. In order for
+the output shaft to rotate at the same rpm as a selected gear, a dog clutch is engaged with the gear. The dog clutches have teeth which engage with holes extruded
+on the gears. A shifter mechanism is used to move the dog clutches. Gear selector forks are attached to saddle-like grooves on the dog clutches. The forks also pass
+through the selector rods which are attached to the housing. As the shift lever is rotated about its fulcrum (via a ball and socket joint), it "pushes" the selector
+rod which in turn moves the gear selector forks and dog clutches. The rotation of the shift lever is sufficient so that the dog clutch fully engages with the gear.
