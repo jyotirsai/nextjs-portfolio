@@ -15,7 +15,7 @@ Since I wanted to keep things simple, I decided to go with the 2d HTML rendering
 My plan was to first make a single player version of the game and then add multiplayer. Before I started the game, I wanted to add webpack so I wouldn't have to worry about manually ordering my scripts to satisfy
 dependencies. I split the webpack configurations into development and production, where the production config focused on optimizing the build for production.
 
-```js {1}
+```js
 // webpack.prod.js
 ...
 module.exports = merge(common, {
@@ -65,7 +65,7 @@ When the user clicks on the Play Solo button, the menu is hidden and we randomly
 I wanted to add multiplayer. When I started the multiplayer, I realized that if I wanted to generate targets for both players, I would have to generate their coordinates on the server and then
 send them to the client to be rendered. So I added express.js to take care of the server side logic.
 
-```js {1}
+```js
 // server.js
 ...
 const app = express()
@@ -88,7 +88,7 @@ const io = socketio(server)
 When the user clicks the Play Solo button, we initialize the game on the client by doing things such as hiding the game menu, initializing the canvas, and adding an event listener to listen to user clicks.
 We also emit a message to our server via socket.io that the Play Solo button has been clicked.
 
-```js {1}
+```js
 // server.js
 ...
 io.on("connection", (socket)=>{
@@ -101,7 +101,7 @@ io.on("connection", (socket)=>{
 })
 ```
 
-```js {1}
+```js
 // Game.js
 function initGame() {
   const state = createGameState()
@@ -132,7 +132,7 @@ function randomTarget(state) {
 The initGame function initializes our game state object which simply keeps track of the current target x and y position, as well as the reaction time of the player. It also generates
 the initial target using the randomTarget function.
 
-```js {1}
+```js
 // server.js
 function emitGameState(state) {
   socket.emit('gameState', JSON.stringify(state))
@@ -141,7 +141,7 @@ function emitGameState(state) {
 
 After the game state is initiated and the target coordinates are rendered, the emitGameState function sends the game state object back to the client.
 
-```js {1}
+```js
 // index.js a.k.a client
 ...
 socket.on("gameState", handleGameState)
@@ -159,7 +159,7 @@ To figure out whether the user has clicked inside the target, we'll have to use 
 handleOnClick function. The event includes the x and y position of where the user has clicked. We want to know if the user has clicked within the circle, so we want to check if x^2 + y^2 <= r^2, where
 r is the radius of the target.
 
-```js {1}
+```js
 // index.js
 function handleOnClick(event) {
   if (Object.keys(state).length != 0) {
@@ -177,7 +177,7 @@ function handleOnClick(event) {
 
 Once the user clicks on the target, we emit their reaction time back to the server.
 
-```js {1}
+```js
 io.on('connection', (socket) => {
   socket.on('clickedTarget', handleClickedTarget)
 
@@ -195,7 +195,7 @@ io.on('connection', (socket) => {
 
 The reaction time is added to the player one times array in the game state object. Once the number of reaction times hits 10, we emit a game over message to the client along with the current state.
 
-```js {1}
+```js
 // index.js
 socket.on('gameOver', handleGameOver)
 
