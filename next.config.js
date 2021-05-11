@@ -39,6 +39,6 @@ module.exports = withBundleAnalyzer({
     return config
   },
   images: {
-    domains: ['jyotirsai.com'],
+    domains: ['jyotirsai.com/public'],
   },
 })
