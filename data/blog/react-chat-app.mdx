@@ -87,7 +87,7 @@ We need to make sure that the messages are displayed to everyone, so we need to 
 which runs code whenever there is a side effect, such as a DOM element changing. Basically, whenever a message is submitted, the useEffect hook will take that message and add it
 to the messagesArray using sockets.
 
-```js {1}
+```js
 // client/src/components/Chat.js
 
 const submitClick = (e) => {
@@ -101,7 +101,7 @@ const submitClick = (e) => {
 
 The above code emits the user's message to the server.
 
-```js {1}
+```js
 // server/index.js
 ...
 io.on("connection", (socket) => {
@@ -113,7 +113,7 @@ io.on("connection", (socket) => {
 
 The server receives the message from the client and emits them back to all the connected sockets.
 
-```js {1}
+```js
 // client/src/components/Chat.js
 
 useEffect(() => {
