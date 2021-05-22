@@ -1,0 +1,103 @@
+---
+title: Navier-Stokes Equations
+date: '2021-05-15'
+tags: ['Physics', 'Engineering', 'Fluid Mechanics']
+draft: false
+summary: An introduction to the concepts involved in deriving the Navier-Stokes Equations.
+---
+
+I like blogging things I'm learning about as it helps consolidate my knowledge. Writing this blog post is one of the ways I can study for my fluid mechanics midterm.
+
+### Eulerian Description of Fluid Flow
+
+The Navier-Stokes equations form the foundation of modern fluid mechanics. They are essentially conservation of momentum equations derived from Newton's
+second law on a fluid. However, there are several concepts that need to be established on the journey towards Navier-Stokes. Let's first talk about the Eulerian
+description of flow. Rather than following a particular fluid particle throughout its motion (Lagrange description), we will define an imaginary control volume and
+evaluate the particles that pass in and out of this control volume. Therefore, instead of defining the velocity of a specific fluid particle, we define the
+velocity field of the fluid that passes through the control volume.
+
+$$\vec{V}=u(x,y,z,t)\vec{i}+v(x,y,z,t)\vec{j}+w(x,y,z,t)\vec{k}$$
+
+Fluid elements passing through the control volume at a particular location and time will have the velocity defined above. The derivative of the velocity yields
+acceleration, but this is only for Lagrangian particles. When using the Eulerian description, we must use the material derivative to calculate acceleration from
+the velocity field. The material derivative is defined as:
+
+$$\frac{DF}{Dt}=\frac{\partial F}{\partial t}+\left (\vec{V}\cdot \vec{\nabla }  \right )F$$
+
+The second term is the divergence of the velocity field which is defined as:
+
+$$div \bold V = \nabla\cdot \bold V=\left ( \frac{\partial }{\partial x}, \frac{\partial }{\partial y}, \frac{\partial }{\partial z} \right )\cdot \left ( V_{x}, V_{y}, V_{z} \right ) = \frac{\partial V_{x}}{\partial x} + \frac{\partial V_{y}}{\partial y}+\frac{\partial V_{z}}{\partial z}$$
+
+The material acceleration is therefore:
+
+$$\vec{a}(x,y,z,t)=\frac{D\vec{V}}{Dt}=\frac{\partial \vec{V}}{\partial t}+\left ( \vec{V}\cdot \vec{\nabla} \right )\vec{V}$$
+
+$$\vec{a}(x,y,z,t)=\frac{\partial \vec{V}}{\partial t}+u\frac{\partial \vec{V}}{\partial x}+v\frac{\partial \vec{V}}{\partial y}+w\frac{\partial \vec{V}}{\partial z}$$
+
+The material derivative offers a link between a Langragian and Eulerian descriptions of fluid flow.
+
+### Reynold's Transport Theorem (RTT)
+
+In fluid mechanics, it is more common to work with control volumes rather than
+a specific system of particles. In a system approach, we assume a closed system i.e. mass cannot cross our system boundary.
+The control volume approach uses an open system where mass can go in and out of the boundaries. Most conservation laws are derived using a system rather than a control volume.
+
+<img src="/static/images/navierstokes/systemVsCV.png" loading="lazy" />
+
+The above figure serves to illustrate the difference between a system and a control volume. The system encompasses all of the mass and will expand with it. The
+control volume does not expand with the mass but it does record the mass entering and leaving its boundaries (along with the mass inside). Reynold's Transport
+Theorem relates a system to a control volume. This allows us to derive conservation laws in terms of a control volume. We can see from the above figure that
+the change in the system is equal to the change in the "stuff" inside the control volume plus the net change going in and out of the control volume.
+
+$$\frac{dB_{sys}}{dt}=\frac{dB_{CV}}{dt}+\dot{B}_{out}-\dot{B}_{in}$$
+
+$B$ simply represents an extensive property. An extensive property is a property that is proportional to the size or quantity of matter in a system such as mass,
+volume, or entropy. An intensive property does not depend on the size or quantity of matter and is related to an extensive property via $b=\frac{B}{m}$. The $\dot{B}$
+term can be re-written as $b\dot{m}$ where $\dot{m}$ is the mass flow rate. The mass flow rate can be further broken down into $\dot{m} = \rho \vec{V} A$ where $\rho$
+is density, $\vec{V}$ is velocity, and $A$ is area.
+
+<img src="/static/images/navierstokes/flux.png" loading="lazy" />
+
+The net flux ($\dot{B}_{out}-\dot{B}_{in}$) can be written as:
+
+$$\dot{B}_{out}-\dot{B}_{in}=\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA$$
+
+$\vec{n}$ is the normal vector and its dot product with $\vec{V}$ ensures that we get the normal velocity. We integrate over the entire differential surface area
+$dA$ (inlet or outlet area). We write it this way so we can account for multiple inlets and outlets of differing sizes. For the control volume, $B_{CV}$ can be written as $\int_{cv}^{}b\rho d\boldsymbol{\mathbf{V}}$ where $d\boldsymbol{\mathbf{V}}$ is the
+differential volume. The original expression relating the system to the control volume is now:
+
+$$\frac{dB_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}b\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA$$
+
+This is Reynold's Transport Theorem for a fixed control volume. For a moving control volume we simply replace the velocity in the above expression with the
+relative velocity $\vec{V_{rel}}$ equal to:
+
+$$\vec{V_{rel}}=\vec{V}-\vec{V_{cs}}$$
+
+$\vec{V_{cs}}$ is the velocity of the control surface.
+
+### Conservation of Mass
+
+In Reynold's Transport Theorem, we looked at a generic extensive property called $B$ and its intensive property $b$. In the case of mass conservation, the
+extensive property is equal to mass ($B=m$) and therefore the intensive property is equal to $b=\frac{m}{m}=1$. Let's write RTT in terms of mass:
+
+$$\frac{dm_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA$$
+
+The left hand side of the above equation is the rate of change of mass in the system. However, we know that from a system perspective the mass does not change.
+Unlike in a control volume, the system will continually transform along with the mass. Therefore, the change in mass of the system is equal to 0.
+
+$$0=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA$$
+
+We can simplify the above expression by writing both terms as a volume integral.
+
+$$\int_{cv}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{v} \right ) \right ]dV_{cv}$$
+
+In order for the above expression to equal 0, the expression in the integrand must also equal 0:
+
+$$\frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{v} \right ) = 0$$
+
+This is the general equation for conservation of mass, also known as the continuity equation. It can be further
+expanded into the following using cartesian coordinates:
+
+$$\frac{\partial \rho}{\partial t}+\frac{\partial v_{x}}{\partial x}+\frac{\partial v_{y}}{\partial y}+\frac{\partial v_{z}}{\partial z}= 0$$
+
+### Conservation of Momentum

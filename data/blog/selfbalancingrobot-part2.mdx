@@ -1,0 +1,137 @@
+---
+title: 'Self-Balancing Robot: Part 2'
+date: '2021-05-23'
+tags: ['Robotics', 'Engineering', 'Programming']
+draft: true
+summary: Part 2 of this series goes over motor control and implementing a PID control algorithm.
+---
+
+### Motor Control
+
+There are 3 components necessary for motor control. The arduino, a motor driver, and the dc motors. Unlike the arduino, the dc motors require a lot of current
+to function. The motor driver interfaces between the arduino and dc motors and essentially amplifies the low current from the arduino, into a higher one for the
+motors. The following diagram shows the function of each pin for a TB6612FNG motor driver. More detail can be found <a href="https://learn.sparkfun.com/tutorials/tb6612fng-hookup-guide/all">here</a>.
+
+<img src="/static/images/selfbalancing/motordriver.png" loading="lazy" />
+
+The manufacturer provides a truth table for the motor driver.
+
+<img src="/static/images/selfbalancing/motordrivertable.png" loading="lazy" />
+
+In order to rotate a motor CCW, we'll need to send a high level signal to the IN2 pin, and a low level signal to the IN1 pin. A Two-Way Schmitt Trigger Reverser
+is used to reverse the signals of IN1 and IN2, so if we send a high level signal to IN1, a low level signal will be automatically sent to IN2. Here's the connections
+we'll use:
+
+<img src="/static/images/selfbalancing/nanopinformotors.png" loading="lazy" />
+
+Let's define a class for the motor in a file called "Motor.h".
+
+```cpp
+
+class Motor {
+    private:
+        #define AIN1 7 // AIN1 pin on motor driver connects to D7 on arduino
+        #define PWMA 5 // PWMA pin -> D5
+        #define BIN1 12 // BIN1 -> D12
+        #define PWMB 6 // PWMB -> D6
+        #define STBY 8 // STBY -> D8
+
+    public:
+        void pinInit(); // assign pins
+        void Forward(int speed); // move forward
+        void Reverse(int speed); // move in reverse
+
+};
+```
+
+Our pinInit() function will assign the digital pins of the arduino as output pins, and we'll set the STBY pin to always be HIGH. The Forward function will
+send signals to rotate the wheels CCW and the Reverse function will do the opposite. We'll add the functions in "Motor.cpp".
+
+```cpp
+#include <Arduino.h>
+#include "Motor.h"
+
+void Motor::pinInit(){
+    // sets pin as output
+    pinMode(AIN1, OUTPUT);
+    pinMode(BIN1, OUTPUT);
+    pinMode(PWMA_LEFT, OUTPUT);
+    pinMode(PWMB_RIGHT, OUTPUT);
+    pinMode(STBY_PIN, OUTPUT);
+    // sets the STBY pin on
+    digitalWrite(STBY_PIN, HIGH);
+}
+
+void Motor::Forward(int speed){
+    digitalWrite(AIN1, 0); // for CCW rotation
+    digitalWrite(BIN1, 0);
+    analogWrite(PWMA, speed); // set speed of motors, betwen 0 and 255
+    analogWrite(PWMB, speed);
+}
+
+void Motor::Reverse(int speed){
+    digitalWrite(AIN1, 1); // for CW rotation
+    digitalWrite(BIN1, 1);
+    analogWrite(PWMA, speed);
+    analogWrite(PWMB, speed);
+}
+```
+
+Let's see an example of how the above can be used. Open an arduino .ino file and upload the following:
+
+```cpp
+#include "Motor.h"
+#define SPEED 255 // anywhere between 0-255
+
+Motor Motor; // instantiate class
+
+void setup() {
+    Motor.pinInit();
+}
+
+void loop() {
+    Motor.Forward(SPEED); // run motors CCW
+    delay(5000); // wait for 5s
+    Motor.Reverse(SPEED); // run motors CW
+    delay(5000);
+}
+
+
+```
+
+That's all we need for the motors to run!
+
+### PID Algorithm
+
+We've implemented a method to detect the angle of inclination of the robot, and a method to drive the motors. Now, we'll learn how we can use a PID
+algorithm to bring the two together to control our robot. The PID algorithm determines a response to a variable by continually calculating the
+difference between the desired value of the variable and the measured value. For the self-balancing robot, we are measuring the angle of inclination
+using the MPU6050 sensor. The desired value of this variable is the angle needed for the robot to be in an upright position. As discussed before, when the
+robot is inclined, we will need to send a signal to the motors to rotate in the direction of inclination. The PID algorithm will adjust the speed of the motors
+needed to balance the system.
+
+The formula for this algorithm is:
+
+$$u(t)=K_{p}e(t)+K_{i}\int_{}^{}e(t)dt + K_{d}\frac{de}{dt}$$
+
+$K_{p}e(t)$ is the proportional term, $K_{i}\int_{}^{}e(t)dt$ is the integral term, and $K_{d}\frac{de}{dt}$ is the derivative term. The error term, $e(t)$ is
+the difference between the desired value and the measured value. $K_{p}$, $K_{i}$, and $K_{d}$ are the coefficients we will "tune" in order to achieve an optimal
+response.
+
+#### Proportional Term
+
+$K_{p}$ is how proportional we want our response to be. If we have a large error, $K_{p}$ will calculate a proportionally large response. This term
+enables a fast response but tends to overshoot.
+
+#### Integral Term
+
+The integral term determines a response based on the accumulation of error. The previously calculated error term is added to
+the current error term and multiplied by the time in-between each calculation. The response produced by this term factors in the error that should have been eliminated
+previously.
+
+#### Derivative Term
+
+The derivative term bases its response on the rate of change of the error, which helps reduce overshoot. This term acts opposite to the integral term in that
+it tries to predict system behaviour.
+
+### Implementing PID Algorithm
