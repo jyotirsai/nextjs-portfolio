@@ -89,7 +89,7 @@ $$0=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V
 
 We can simplify the above expression by writing both terms as a volume integral.
 
-$$\int_{cv}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{v} \right ) \right ]dV_{cv}$$
+$$0=\int_{cv}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{v} \right ) \right ]dV_{cv}$$
 
 In order for the above expression to equal 0, the expression in the integrand must also equal 0:
 
@@ -101,3 +101,17 @@ expanded into the following using cartesian coordinates:
 $$\frac{\partial \rho}{\partial t}+\frac{\partial v_{x}}{\partial x}+\frac{\partial v_{y}}{\partial y}+\frac{\partial v_{z}}{\partial z}= 0$$
 
 ### Conservation of Momentum
+
+For this case, our extensive property is momentum ($m\vec{V}$), so from RTT we have:
+
+$$\frac{d(m\vec{V})_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA$$
+
+First, let's take a look at the left hand side. Our mass in the system is not changing so we can take out that term from the derivative. That leaves us with the
+derivative of the velocity which is just acceleration. Therefore, we have mass times acceleration which is simply equal to the net force on the system.
+
+$$\sum F=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA$$
+
+The forces acting on the fluid includes surface (ex. pressure) and body (ex. gravity) forces. We can simplify the left hand side by assuming a Newtonian fluid with
+the following stress tensor:
+
+$$T=-\left ( p+\frac{2}{3}\mu \frac{\partial V_{k}}{\partial x_{k}} \right )\delta_{ij}+\mu\left ( \frac{\partial V_{i}}{\partial x_{j}}+\frac{\partial V_{j}}{\partial x_{i}} \right )$$

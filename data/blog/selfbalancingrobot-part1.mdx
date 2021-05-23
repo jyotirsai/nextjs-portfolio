@@ -30,7 +30,7 @@ continually spin until our sensor has detected that the angle of the robot is ne
 
 The Inertial Measurement Unit (IMU) is a sensor that can be used to detect the angle, or orientation of a body. It consists of accelerometers used to calculate
 linear accelerations and gyroscopes used for angular velocities. An MPU6050 is an IMU we can use to measure angles. It can be hooked up to an Arduino where we
-can read the angles it measures. The below diagram details which pins from the arduino we will connect with the MPU.
+can read the values it measures. The below diagram details which pins from the arduino we will connect with the MPU.
 
 <img src="/static/images/selfbalancing/mpupins.png" loading="lazy" />
 
@@ -274,6 +274,8 @@ the g-force in the z direction is equal to g, which is 9.8 N, which physically m
 <img src="/static/images/selfbalancing/mpuangles.png" loading="lazy" />
 
 We can convert the accelerometer readings into angles, which we'll need later. The following diagram and formulas from <a href="https://www.digikey.com/en/articles/using-an-accelerometer-for-inclination-sensing">digikey</a> are used for the conversion.
+
+<img src="/static/images/selfbalancing/mpuangles2.png" loading="lazy" />
 
 $$\theta = \tan^{-1}\left ( \frac{ax}{\sqrt{ay^{2}+az^{2}}} \right )$$
 

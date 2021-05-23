@@ -135,3 +135,7 @@ The derivative term bases its response on the rate of change of the error, which
 it tries to predict system behaviour.
 
 ### Implementing PID Algorithm
+
+The desired value we need to keep the robot upright is our angle in the upright position. In my case, when the robot is upright my ay angle is roughly 0. Therefore,
+I'll use the ay angle for my PID algorithm. When this angle is not 0, I need to tell my motors to move. When the robot tips forward I get a positive angle, and when it
+tips backward I get a negative angle. I can use this information to determine whether to rotate the wheels forwards or backwards.
