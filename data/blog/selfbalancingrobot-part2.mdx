@@ -1,10 +1,15 @@
 ---
 title: 'Self-Balancing Robot: Part 2'
-date: '2021-05-23'
+date: '2021-05-24'
 tags: ['Robotics', 'Engineering', 'Programming']
-draft: true
+draft: false
 summary: Part 2 of this series goes over motor control and implementing a PID control algorithm.
 ---
+
+<i>
+  This is the 2nd part of my self-balancing robot series. Please read the part 1 where I go over its
+  physics and using an IMU to detect angles.{' '}
+</i>
 
 ### Motor Control
 
@@ -112,7 +117,9 @@ needed to balance the system.
 
 The formula for this algorithm is:
 
-$$u(t)=K_{p}e(t)+K_{i}\int_{}^{}e(t)dt + K_{d}\frac{de}{dt}$$
+$$
+u(t)=K_{p}e(t)+K_{i}\int_{}^{}e(t)dt + K_{d}\frac{de}{dt}
+$$
 
 $K_{p}e(t)$ is the proportional term, $K_{i}\int_{}^{}e(t)dt$ is the integral term, and $K_{d}\frac{de}{dt}$ is the derivative term. The error term, $e(t)$ is
 the difference between the desired value and the measured value. $K_{p}$, $K_{i}$, and $K_{d}$ are the coefficients we will "tune" in order to achieve an optimal
@@ -136,6 +143,206 @@ it tries to predict system behaviour.
 
 ### Implementing PID Algorithm
 
-The desired value we need to keep the robot upright is our angle in the upright position. In my case, when the robot is upright my ay angle is roughly 0. Therefore,
+We'll program a basic PID algorithm to achieve some control of our robot. The desired value we need to keep the robot upright is our angle in the upright position. In my case, when the robot is upright my ay angle is roughly 0. Therefore,
 I'll use the ay angle for my PID algorithm. When this angle is not 0, I need to tell my motors to move. When the robot tips forward I get a positive angle, and when it
-tips backward I get a negative angle. I can use this information to determine whether to rotate the wheels forwards or backwards.
+tips backward I get a negative angle. I can use this information to determine whether to rotate the wheels forwards or backwards. Let's make a function to compute our PID output and
+define some variables.
+
+```cpp
+// PID Variables
+float previousTime = 0;
+float prevErr = 0;
+float currentTime, deltaTime, error, sumErr, dErr, pid;
+float desired = 0; // desired angle is 0 degrees
+float Kp = 30;
+float Ki = 10;
+float Kd = 1;
+
+float PID(float measured){
+    // PID calculations
+}
+```
+
+The PID function will take the measured angle as an input. For the integral and derivative terms, we need the time difference between measurements for the calculation.
+
+```cpp
+// PID Variables
+float previousTime = 0;
+float prevErr = 0;
+float currentTime, deltaTime, error, sumErr, dErr, pid;
+float desired = 0; // desired angle is 0 degrees
+float Kp = 30; // need to tune these values
+float Ki = 10;
+float Kd = 1;
+
+float PID(float measured){
+    // PID calculations
+
+    // time calcs
+    currentTime = millis();
+    deltaTime = currentTime-previousTime;
+
+}
+```
+
+The error, sum of the errors, and derivative of the error needs to calculated.
+
+```cpp
+// PID Variables
+float previousTime = 0;
+float prevErr = 0;
+float currentTime, deltaTime, error, sumErr, dErr, pid;
+float desired = 0; // desired angle is 0 degrees
+float Kp = 30;
+float Ki = 10;
+float Kd = 1;
+
+float PID(float measured){
+    // PID calculations
+
+    // time calcs
+    currentTime = millis();
+    deltaTime = currentTime-previousTime;
+
+    // error calcs
+    error = abs(desired - measured);
+    sumErr += error*deltaTime;
+    dErr = (error-prevErr)/deltaTime;
+
+}
+```
+
+Next, we will calculate the PID output. The motors PWM output limit is 255, therefore if the PID calculation is greater than 255 we need to set it to 255. If the
+value is less than 0, we will set it to 0. Also, if the robot tips over completely we want to turn off the motors so they don't keep spinning.
+
+```cpp
+// PID Variables
+float previousTime = 0;
+float prevErr = 0;
+float currentTime, deltaTime, error, sumErr, dErr, pid;
+float desired = 0; // desired angle is 0 degrees
+float Kp = 30;
+float Ki = 10;
+float Kd = 1;
+
+float PID(float measured){
+    // PID calculations
+
+    // time calcs
+    currentTime = millis();
+    deltaTime = currentTime-previousTime;
+
+    // error calcs
+    error = abs(desired - measured);
+    sumErr += error*deltaTime;
+    dErr = (error-prevErr)/deltaTime;
+
+    // pid calc
+    pid = Kp*error+Ki*sumErr-Kd*dErr;
+
+    // keep values for next iteration
+    prevErr = error;
+    previousTime = currentTime;
+
+    if (pid > 255){
+        pid = 255;
+    }
+
+    if (pid < 0){
+        pid = 0;
+    }
+
+    // stop motors if robot tips over
+    if (abs(measured) > 30){
+        pid = 0;
+    }
+
+    return pid;
+
+}
+```
+
+The PID function can now be used in the loop to continually updated the motor speed. Open an arduino file and add the following. When the angle is negative,
+the motors need to spin clockwise so I call the Motor.Reverse function. When the angle is positive, the motors need to spin counter-clockwise so I call the Motor.Forward function.
+
+```cpp
+#include "Motor.h"
+#include "mpu.h"
+
+mpu mpu; // instantiate MPU class
+Motor Motor; // instantiate Motor class
+
+void setup() {
+  // put your setup code here, to run once:
+  mpu.init(); // initialize mpu
+  Motor.pinInit(); // initialize motor pins
+}
+
+int output;
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  mpu.retrieveData(); // retrieves raw accelerometer data
+  mpu.processData(); // converts raw data into angles
+  output = PID(mpu.angleY); // compute pid using current angleY measurement
+
+
+  if (mpu.angleY < 0) {
+    Motor.Reverse(output);
+  }
+
+  if (mpu.angleY > 0){
+    Motor.Forward(output);
+  }
+
+}
+
+// PID Variables
+float previousTime = 0;
+float prevErr = 0;
+float currentTime, deltaTime, error, sumErr, dErr, pid;
+float desired = 0; // desired angle is 0 degrees
+float Kp = 30;
+float Ki = 10;
+float Kd = 1;
+
+float PID(float measured){
+    // PID calculations
+
+    // time calcs
+    currentTime = millis();
+    deltaTime = currentTime-previousTime;
+
+    // error calcs
+    error = abs(desired - measured);
+    sumErr += error*deltaTime;
+    dErr = (error-prevErr)/deltaTime;
+
+    // pid calc
+    pid = Kp*error+Ki*sumErr-Kd*dErr;
+
+    // keep values for next iteration
+    prevErr = error;
+    previousTime = currentTime;
+
+    if (pid > 255){
+        pid = 255;
+    }
+
+    if (pid < 0){
+        pid = 0;
+    }
+
+    // stop motors if robot tips over
+    if (abs(measured) > 30){
+        pid = 0;
+    }
+
+    return pid;
+
+}
+```
+
+The balancing of the robot is quite jittery and eventually drifts and falls over. There are a number of ways to improve this such as using the gyroscope for angle measurements,
+and better tuning of the PID coefficients. We can also use the DC motor encoders to find the RPM of the motors which we can then use in a another PID calculation. We'll work on adding
+these features and improving the robot in the future.

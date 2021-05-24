@@ -16,23 +16,33 @@ description of flow. Rather than following a particular fluid particle throughou
 evaluate the particles that pass in and out of this control volume. Therefore, instead of defining the velocity of a specific fluid particle, we define the
 velocity field of the fluid that passes through the control volume.
 
-$$\vec{V}=u(x,y,z,t)\vec{i}+v(x,y,z,t)\vec{j}+w(x,y,z,t)\vec{k}$$
+$$
+\vec{V}=u(x,y,z,t)\vec{i}+v(x,y,z,t)\vec{j}+w(x,y,z,t)\vec{k}
+$$
 
 Fluid elements passing through the control volume at a particular location and time will have the velocity defined above. The derivative of the velocity yields
 acceleration, but this is only for Lagrangian particles. When using the Eulerian description, we must use the material derivative to calculate acceleration from
 the velocity field. The material derivative is defined as:
 
-$$\frac{DF}{Dt}=\frac{\partial F}{\partial t}+\left (\vec{V}\cdot \vec{\nabla }  \right )F$$
+$$
+\frac{DF}{Dt}=\frac{\partial F}{\partial t}+\left (\vec{V}\cdot \vec{\nabla }  \right )F
+$$
 
 The second term is the divergence of the velocity field which is defined as:
 
-$$div \bold V = \nabla\cdot \bold V=\left ( \frac{\partial }{\partial x}, \frac{\partial }{\partial y}, \frac{\partial }{\partial z} \right )\cdot \left ( V_{x}, V_{y}, V_{z} \right ) = \frac{\partial V_{x}}{\partial x} + \frac{\partial V_{y}}{\partial y}+\frac{\partial V_{z}}{\partial z}$$
+$$
+div \bold V = \nabla\cdot \bold V=\left ( \frac{\partial }{\partial x}, \frac{\partial }{\partial y}, \frac{\partial }{\partial z} \right )\cdot \left ( V_{x}, V_{y}, V_{z} \right ) = \frac{\partial V_{x}}{\partial x} + \frac{\partial V_{y}}{\partial y}+\frac{\partial V_{z}}{\partial z}
+$$
 
 The material acceleration is therefore:
 
-$$\vec{a}(x,y,z,t)=\frac{D\vec{V}}{Dt}=\frac{\partial \vec{V}}{\partial t}+\left ( \vec{V}\cdot \vec{\nabla} \right )\vec{V}$$
+$$
+\vec{a}(x,y,z,t)=\frac{D\vec{V}}{Dt}=\frac{\partial \vec{V}}{\partial t}+\left ( \vec{V}\cdot \vec{\nabla} \right )\vec{V}
+$$
 
-$$\vec{a}(x,y,z,t)=\frac{\partial \vec{V}}{\partial t}+u\frac{\partial \vec{V}}{\partial x}+v\frac{\partial \vec{V}}{\partial y}+w\frac{\partial \vec{V}}{\partial z}$$
+$$
+\vec{a}(x,y,z,t)=\frac{\partial \vec{V}}{\partial t}+u\frac{\partial \vec{V}}{\partial x}+v\frac{\partial \vec{V}}{\partial y}+w\frac{\partial \vec{V}}{\partial z}
+$$
 
 The material derivative offers a link between a Langragian and Eulerian descriptions of fluid flow.
 
@@ -49,7 +59,9 @@ control volume does not expand with the mass but it does record the mass enterin
 Theorem relates a system to a control volume. This allows us to derive conservation laws in terms of a control volume. We can see from the above figure that
 the change in the system is equal to the change in the "stuff" inside the control volume plus the net change going in and out of the control volume.
 
-$$\frac{dB_{sys}}{dt}=\frac{dB_{CV}}{dt}+\dot{B}_{out}-\dot{B}_{in}$$
+$$
+\frac{dB_{sys}}{dt}=\frac{dB_{CV}}{dt}+\dot{B}_{out}-\dot{B}_{in}
+$$
 
 $B$ simply represents an extensive property. An extensive property is a property that is proportional to the size or quantity of matter in a system such as mass,
 volume, or entropy. An intensive property does not depend on the size or quantity of matter and is related to an extensive property via $b=\frac{B}{m}$. The $\dot{B}$
@@ -60,18 +72,24 @@ is density, $\vec{V}$ is velocity, and $A$ is area.
 
 The net flux ($\dot{B}_{out}-\dot{B}_{in}$) can be written as:
 
-$$\dot{B}_{out}-\dot{B}_{in}=\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA$$
+$$
+\dot{B}_{out}-\dot{B}_{in}=\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA
+$$
 
 $\vec{n}$ is the normal vector and its dot product with $\vec{V}$ ensures that we get the normal velocity. We integrate over the entire differential surface area
 $dA$ (inlet or outlet area). We write it this way so we can account for multiple inlets and outlets of differing sizes. For the control volume, $B_{CV}$ can be written as $\int_{cv}^{}b\rho d\boldsymbol{\mathbf{V}}$ where $d\boldsymbol{\mathbf{V}}$ is the
 differential volume. The original expression relating the system to the control volume is now:
 
-$$\frac{dB_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}b\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA$$
+$$
+\frac{dB_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}b\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA
+$$
 
 This is Reynold's Transport Theorem for a fixed control volume. For a moving control volume we simply replace the velocity in the above expression with the
 relative velocity $\vec{V_{rel}}$ equal to:
 
-$$\vec{V_{rel}}=\vec{V}-\vec{V_{cs}}$$
+$$
+\vec{V_{rel}}=\vec{V}-\vec{V_{cs}}
+$$
 
 $\vec{V_{cs}}$ is the velocity of the control surface.
 
@@ -80,38 +98,77 @@ $\vec{V_{cs}}$ is the velocity of the control surface.
 In Reynold's Transport Theorem, we looked at a generic extensive property called $B$ and its intensive property $b$. In the case of mass conservation, the
 extensive property is equal to mass ($B=m$) and therefore the intensive property is equal to $b=\frac{m}{m}=1$. Let's write RTT in terms of mass:
 
-$$\frac{dm_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA$$
+$$
+\frac{dm_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA
+$$
 
 The left hand side of the above equation is the rate of change of mass in the system. However, we know that from a system perspective the mass does not change.
 Unlike in a control volume, the system will continually transform along with the mass. Therefore, the change in mass of the system is equal to 0.
 
-$$0=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA$$
+$$
+0=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA
+$$
 
 We can simplify the above expression by writing both terms as a volume integral.
 
-$$0=\int_{cv}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{v} \right ) \right ]dV_{cv}$$
+$$
+0=\int_{cv}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{V} \right ) \right ]dV_{cv}
+$$
 
 In order for the above expression to equal 0, the expression in the integrand must also equal 0:
 
-$$\frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{v} \right ) = 0$$
+$$
+\frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{V} \right ) = 0
+$$
 
 This is the general equation for conservation of mass, also known as the continuity equation. It can be further
 expanded into the following using cartesian coordinates:
 
-$$\frac{\partial \rho}{\partial t}+\frac{\partial v_{x}}{\partial x}+\frac{\partial v_{y}}{\partial y}+\frac{\partial v_{z}}{\partial z}= 0$$
+$$
+\frac{\partial \rho}{\partial t}+\frac{\partial V_{x}}{\partial x}+\frac{\partial V_{y}}{\partial y}+\frac{\partial V_{z}}{\partial z}= 0
+$$
 
 ### Conservation of Momentum
 
 For this case, our extensive property is momentum ($m\vec{V}$), so from RTT we have:
 
-$$\frac{d(m\vec{V})_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA$$
+$$
+\frac{d(m\vec{V})_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
+$$
 
 First, let's take a look at the left hand side. Our mass in the system is not changing so we can take out that term from the derivative. That leaves us with the
 derivative of the velocity which is just acceleration. Therefore, we have mass times acceleration which is simply equal to the net force on the system.
 
-$$\sum F=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA$$
+$$
+\sum F=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
+$$
 
 The forces acting on the fluid includes surface (ex. pressure) and body (ex. gravity) forces. We can simplify the left hand side by assuming a Newtonian fluid with
 the following stress tensor:
 
-$$T=-\left ( p+\frac{2}{3}\mu \frac{\partial V_{k}}{\partial x_{k}} \right )\delta_{ij}+\mu\left ( \frac{\partial V_{i}}{\partial x_{j}}+\frac{\partial V_{j}}{\partial x_{i}} \right )$$
+$$
+T=-\left ( p+\frac{2}{3}\mu \frac{\partial V_{k}}{\partial x_{k}} \right )\delta_{ij}+\mu\left ( \frac{\partial V_{i}}{\partial x_{j}}+\frac{\partial V_{j}}{\partial x_{i}} \right )
+$$
+
+where $p$ is pressure, $\mu$ is the dynamic viscosity of the fluid, and $\delta_{ij}$ is the Kronecker delta. The Kronecker delta is equal to 1 when $i=j$ and equal to 0
+when $i \neq j$. If we assume that the fluid is incompressible (which is a reasonable assumption), then the stress tensor can be evaluated to the following.
+
+$$
+T=\begin{bmatrix}
+-P+2\mu \frac{\partial u}{\partial x} & \mu\left ( \frac{\partial u}{\partial y}+\frac{\partial v}{\partial x} \right ) & \mu\left ( \frac{\partial u}{\partial z}+\frac{\partial w}{\partial x} \right ) \\
+\mu\left ( \frac{\partial v}{\partial x}+\frac{\partial u}{\partial y} \right ) & -P+2\mu \frac{\partial v}{\partial y} & \mu\left ( \frac{\partial v}{\partial z}+\frac{\partial w}{\partial y} \right ) \\
+\mu\left ( \frac{\partial w}{\partial x}+\frac{\partial u}{\partial z} \right ) & \mu\left ( \frac{\partial w}{\partial y}+\frac{\partial v}{\partial z} \right ) & -P+2\mu \frac{\partial w}{\partial z}
+\end{bmatrix}
+$$
+
+The left hand side is now equal to:
+
+$$
+\sum F = \sum F_{surfaces} + \sum F_{body} = \nabla \cdot T + \rho \vec{b}
+$$
+
+where $\vec{b}$ is the body forces per unit mass. The momentum expression is now:
+
+$$
+\nabla \cdot T + \rho \vec{b} = \frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
+$$
