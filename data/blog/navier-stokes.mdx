@@ -73,7 +73,7 @@ is density, $\vec{V}$ is velocity, and $A$ is area.
 The net flux ($\dot{B}_{out}-\dot{B}_{in}$) can be written as:
 
 $$
-\dot{B}_{out}-\dot{B}_{in}=\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA
+\dot{B}_{out}-\dot{B}_{in}=\int_{CS}^{}b\rho\vec{V}\cdot \vec{n} dA
 $$
 
 $\vec{n}$ is the normal vector and its dot product with $\vec{V}$ ensures that we get the normal velocity. We integrate over the entire differential surface area
@@ -81,17 +81,17 @@ $dA$ (inlet or outlet area). We write it this way so we can account for multiple
 differential volume. The original expression relating the system to the control volume is now:
 
 $$
-\frac{dB_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}b\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}b\rho\vec{V}\cdot \vec{n} dA
+\frac{dB_{sys}}{dt}=\frac{d}{dt}\int_{CV}^{}b\rho d\boldsymbol{\mathbf{V}}+\int_{CS}^{}b\rho\vec{V}\cdot \vec{n} dA
 $$
 
 This is Reynold's Transport Theorem for a fixed control volume. For a moving control volume we simply replace the velocity in the above expression with the
 relative velocity $\vec{V_{rel}}$ equal to:
 
 $$
-\vec{V_{rel}}=\vec{V}-\vec{V_{cs}}
+\vec{V_{rel}}=\vec{V}-\vec{V_{CS}}
 $$
 
-$\vec{V_{cs}}$ is the velocity of the control surface.
+$\vec{V_{CS}}$ is the velocity of the control surface.
 
 ### Conservation of Mass
 
@@ -99,20 +99,20 @@ In Reynold's Transport Theorem, we looked at a generic extensive property called
 extensive property is equal to mass ($B=m$) and therefore the intensive property is equal to $b=\frac{m}{m}=1$. Let's write RTT in terms of mass:
 
 $$
-\frac{dm_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA
+\frac{dm_{sys}}{dt}=\frac{d}{dt}\int_{CV}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{CS}^{}\rho\vec{V}\cdot \vec{n} dA
 $$
 
 The left hand side of the above equation is the rate of change of mass in the system. However, we know that from a system perspective the mass does not change.
 Unlike in a control volume, the system will continually transform along with the mass. Therefore, the change in mass of the system is equal to 0.
 
 $$
-0=\frac{d}{dt}\int_{cv}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\cdot \vec{n} dA
+0=\frac{d}{dt}\int_{CV}^{}\rho d\boldsymbol{\mathbf{V}}+\int_{CS}^{}\rho\vec{V}\cdot \vec{n} dA
 $$
 
 We can simplify the above expression by writing both terms as a volume integral.
 
 $$
-0=\int_{cv}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{V} \right ) \right ]dV_{cv}
+0=\int_{CV}^{}\left [ \frac{\partial \rho}{\partial t}+\nabla\cdot \left ( \rho \vec{V} \right ) \right ]dV_{cv}
 $$
 
 In order for the above expression to equal 0, the expression in the integrand must also equal 0:
@@ -133,14 +133,14 @@ $$
 For this case, our extensive property is momentum ($m\vec{V}$), so from RTT we have:
 
 $$
-\frac{d(m\vec{V})_{sys}}{dt}=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
+\frac{d(m\vec{V})_{sys}}{dt}=\frac{d}{dt}\int_{CV}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{CS}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
 $$
 
 First, let's take a look at the left hand side. Our mass in the system is not changing so we can take out that term from the derivative. That leaves us with the
 derivative of the velocity which is just acceleration. Therefore, we have mass times acceleration which is simply equal to the net force on the system.
 
 $$
-\sum F=\frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
+\sum F=\frac{d}{dt}\int_{CV}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{CS}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
 $$
 
 The forces acting on the fluid includes surface (ex. pressure) and body (ex. gravity) forces. We can simplify the left hand side by assuming a Newtonian fluid with
@@ -164,11 +164,133 @@ $$
 The left hand side is now equal to:
 
 $$
-\sum F = \sum F_{surfaces} + \sum F_{body} = \nabla \cdot T + \rho \vec{b}
+\sum F = \sum F_{surfaces} + \sum F_{body} = \int_{CS}^{}T \cdot \vec{n}dA  + \int_{CV}^{}\rho \vec{b}dV
 $$
 
-where $\vec{b}$ is the body forces per unit mass. The momentum expression is now:
+The surface forces are inside a surface integral. $\vec{b}$ is the body forces per unit mass. The momentum expression is now:
 
 $$
-\nabla \cdot T + \rho \vec{b} = \frac{d}{dt}\int_{cv}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{cs}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
+\int_{CS}^{}T \cdot \vec{n}dA  + \int_{CV}^{}\rho \vec{b}dV = \frac{d}{dt}\int_{CV}^{}\vec{V}\rho d\boldsymbol{\mathbf{V}}+\int_{CS}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA
 $$
+
+We have terms in surface and volume integrals so we will write everything to be inside a volume integral using the divergence theorem.
+
+$$
+\int_{CS}^{}\rho\vec{V}\vec{V}\cdot \vec{n} dA = \int_{CV}^{} \vec{\nabla} \cdot \left ( \rho \vec{V}\vec{V} \right )dV
+$$
+
+$$
+\int_{CS}^{}T \cdot \vec{n}dA = \int_{CV}^{} \vec{ \nabla} \cdot T dV
+$$
+
+Now we can rearrange everything inside a volume integral.
+
+$$
+\int_{CV}^{}\left [ \frac{\partial}{\partial t} \left ( \rho \vec{V} \right) + \vec{\nabla} \cdot \left ( \rho \vec{V} \vec{V} \right) - \rho \vec{b} - \vec{ \nabla} \cdot T  \right ]dV = 0
+$$
+
+The expression inside the integrand must also equal zero for the above to hold true. Therefore, we can simplify to the following:
+
+$$
+\frac{\partial}{\partial t} \left ( \rho \vec{V} \right) + \vec{\nabla} \cdot \left ( \rho \vec{V} \vec{V} \right) = \rho \vec{b} + \vec{ \nabla} \cdot T
+$$
+
+The expressions on the left can be expanded into the following.
+
+$$
+\frac{\partial}{\partial t} \left ( \rho \vec{V} \right) = \rho \frac{\partial \vec{v}}{\partial t}+\vec{V}\frac{\partial \rho}{\partial t}
+$$
+
+$$
+\vec{\nabla} \cdot \left ( \rho \vec{V} \vec{V} \right) = \vec{V}\vec{\nabla}\cdot\left ( \rho \vec{V} \right)+\rho\left (\vec{V}\cdot\vec{\nabla} \right)\vec{V}
+$$
+
+Plugging the above back into our expression we have:
+
+$$
+\rho \frac{\partial \vec{V}}{\partial t}+\vec{V}\frac{\partial \rho}{\partial t} + \vec{V}\vec{\nabla}\cdot\left ( \rho \vec{V} \right)+\rho\left (\vec{V}\cdot\vec{\nabla} \right)\vec{V} = \rho \vec{b} + \vec{ \nabla} \cdot T
+$$
+
+On the left hand side, we have the expression $\vec{V}\frac{\partial \rho}{\partial t} + \vec{V}\vec{\nabla}\cdot\left ( \rho \vec{V} \right)$ which can be written as:
+
+$$
+\vec{V}\left (\frac{\partial \rho}{\partial t}+ \vec{\nabla}\cdot\left ( \rho \vec{V} \right)\right)
+$$
+
+The expression in brackets is simply our conservation of mass expression from before which is equal to 0! So now we have:
+
+$$
+\rho \frac{\partial \vec{V}}{\partial t}+\rho\left (\vec{V}\cdot\vec{\nabla} \right)\vec{V}=\rho \vec{b} + \vec{ \nabla} \cdot T
+$$
+
+The left hand side can be reduced even further. We can write $\rho \frac{\partial \vec{V}}{\partial t}+\rho\left (\vec{V}\cdot\vec{\nabla} \right)\vec{V}$ as
+$\rho \left [\frac{\partial \vec{V}}{\partial t}+\left (\vec{V}\cdot\vec{\nabla} \right)\vec{V}\right]$ where the expression in brackets is the definition of the material
+derivative. Therefore, we have:
+
+$$
+\rho \frac{D\vec{v}}{Dt}=\vec{\nabla}\cdot T+\rho \vec{b}
+$$
+
+If the only body force that acts on the CV is gravity then we can write $\vec{b}=\vec{g}$. Let's expand the above expression into cartesian coordinates.
+
+$$
+x-component:        \rho \frac{Du}{Dt}=\frac{\partial T_{11}}{\partial x}+\frac{\partial T_{21}}{\partial y}+\frac{\partial T_{31}}{\partial z}+\rho g_{x}
+$$
+
+$$
+y-component:        \rho \frac{Dv}{Dt}=\frac{\partial T_{12}}{\partial x}+\frac{\partial T_{22}}{\partial y}+\frac{\partial T_{32}}{\partial z}+\rho g_{y}
+$$
+
+$$
+z-component:        \rho \frac{Dw}{Dt}=\frac{\partial T_{13}}{\partial x}+\frac{\partial T_{23}}{\partial y}+\frac{\partial T_{33}}{\partial z}+\rho g_{z}
+$$
+
+Let's go over evaluating the derivatives of the stress tensor terms. We'll start with the x component.
+
+$$
+\frac{\partial T_{11}}{\partial x} = \frac{-\partial P}{\partial x}+2\mu\frac{\partial^{2}u}{\partial x^{2}}
+$$
+
+$$
+\frac{\partial T_{21}}{\partial y} = \mu \frac{\partial}{\partial y} \left ( \frac{\partial v}{\partial x} + \frac{\partial u}{\partial y} \right)
+$$
+
+$$
+\frac{\partial T_{31}}{\partial z} = \mu \frac{\partial}{\partial z} \left ( \frac{\partial w}{\partial x} + \frac{\partial u}{\partial z} \right)
+$$
+
+The x-component can now be written as:
+
+$$
+\rho \frac{Du}{Dt}=\frac{-\partial P}{\partial x}+2\mu\frac{\partial^{2}u}{\partial x^{2}}+\mu \frac{\partial}{\partial y} \left ( \frac{\partial v}{\partial x} + \frac{\partial u}{\partial y} \right)+\mu \frac{\partial}{\partial z} \left ( \frac{\partial w}{\partial x} + \frac{\partial u}{\partial z} \right)+\rho g_{x}
+$$
+
+Which can be rearranged into:
+
+$$
+\rho \frac{Du}{Dt}=\frac{-\partial P}{\partial x}+\mu \left [\frac{\partial}{\partial x} \left (\frac{\partial u}{\partial x}+\frac{\partial v}{\partial y}+\frac{\partial w}{\partial z} \right) +\frac{\partial^{2}u}{\partial x^{2}}+\frac{\partial^{2}u}{\partial y^{2}}+\frac{\partial^{2}u}{\partial z^{2}} \right]+\rho g_{x}
+$$
+
+The term in parentheses is simply 0 due to mass conservation and the squared partial derivatives are the Laplacian ($\nabla^{2}$) of the $u$.
+
+$$
+\rho \frac{Du}{Dt}=\frac{-\partial P}{\partial x}+\mu \nabla^{2} u+\rho g_{x}
+$$
+
+The y and z terms can similarly be reduced to:
+
+$$
+\rho \frac{Dv}{Dt}=\frac{-\partial P}{\partial y}+\mu \nabla^{2} v+\rho g_{y}
+$$
+
+$$
+\rho \frac{Dw}{Dt}=\frac{-\partial P}{\partial z}+\mu \nabla^{2} w+\rho g_{z}
+$$
+
+The three expressions can be written as one vector equation:
+
+$$
+\rho \frac{D\vec{V}}{Dt}=-\vec{\nabla}P+\rho\vec{g}+\mu\nabla^{2}\vec{V}
+$$
+
+This final expression is known as the Navier-Stokes equation.
