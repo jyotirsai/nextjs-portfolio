@@ -1,0 +1,231 @@
+---
+title: 'Measuring Webcam Latency using Python OpenCV and an Arduino'
+date: '2021-09-13'
+tags: ['Programming', 'Python', 'Arduino']
+draft: false
+summary: Using a blinking LED attached to an Arduino to measure the latency of a webcam.
+---
+
+Anyone who has used a webcam has probably experienced that little time lag between when they move their hand versus when it's actually displayed on the screen.
+This time lag, also known as latency, is usually around 100-200 ms in video conference calls, and less than 60 ms in live broadcasts. In this blog post, I'll
+be going over how I measured the latency of my <a href="https://www.amazon.ca/s?k=nexigo+n60&i=electronics&crid=1ZBAM26YEGPJH&ref=nb_sb_ss_ts-doa-p_3_6">Nexigo N60 Webcam</a>.
+
+## The Basic Setup
+
+I used the following components in addition to my laptop to measure the latency:
+
+<ul>
+  <li>Webcam (Obviously)</li>
+  <li>Arduino </li>
+  <li>LED (or just use Arduino's on board LED)</li>
+  <li>Breadboard + wires (optional)</li>
+  <li>Some type of box like a shoebox (optional)</li>
+</ul>
+
+Here's how it works: The Arduino will be programmed to turn an LED on for one second and turn it off for another second. The webcam is pointed at the LED and will be used to detect
+the change in brightness caused by the LED being turned on. Using Python, we will record the time when the LED is turned on and also record the time when the change in brightness is detected
+by the webcam. I placed the setup inside a shoebox so that the difference in brightness between the LED off and LED on would be significant.
+
+<img src="/static/images/webcam/setup.png" loading="lazy" />
+
+## Communicating with Arduino
+
+I want to communicate with the Arduino and tell it when to turn the LED on and off directly from Python, rather than using the Arduino IDE. This is because I can then directly access the
+times when the LED was turned on and compare it with the webcam detection times all within the same file. In order to do this we'll need to install the pyserial python library, find the COM port,
+and find the baud rate. Let's start with finding the COM port and the baud rate. We'll need to open the Arduino IDE and setup up the Arduino with the LED to do this.
+
+Set up the Arduino as shown below from <a href="https://www.arduino.cc/en/Tutorial/BuiltInExamples/Blink"> this tutorial</a>.
+
+<img src="/static/images/webcam/arduinoBlink.png" loading="lazy" />
+
+Open the Arduino IDE and upload an example sketch called PhysicalPixel.
+
+<img src="/static/images/webcam/physicalpixel.png" loading="lazy" />
+
+This sketch will allow us to turn the LED on and off by typing "H" for on and "L" for off in the serial monitor. Upload the
+sketch to the Arduino and then open the serial monitor (Tools tab). Take note of COM port that is shown and the baud rate. We
+will need these two values to communicate with the Arduino from Python.
+
+Open your command line and install the pyserial library. Make sure to have pip and Python installed beforehand.
+
+```bash
+
+pip install pyserial
+
+```
+
+Let's open a Python file and start communicating with the Arduino.
+
+```py
+
+import serial
+import time
+
+ser = serial.Serial('COM4', 9600) # Enter your COM port and baud rate here
+
+# function to blink LED on and off 30 times
+def LEDLoop():
+    count = 0
+    while True:
+        ser.write(b'H') # set LED on
+        time.sleep(1) # pause for 1 second
+        ser.write(b'L') # set LED off
+        time.sleep(1)
+        if count >= 29:
+            break
+        else:
+            count = count + 1
+
+# Run loop
+LEDLoop()
+```
+
+Run the above code and your LED should blink on and off 30 times.
+
+## Retrieving Webcam Video using OpenCV
+
+Now we will go over reading the webcam video using OpenCV.
+First, install the following packages:
+
+```bash
+
+pip install opencv-Python numpy
+
+```
+
+Open a separate file from before and copy the following code. Make sure your webcam is connected to your PC.
+
+```py
+
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+while True:
+
+    ret,video = cap.read()
+    grayVideo = cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('Webcam', grayVideo)
+
+    if cv2.waitKey(1) & 0xFF == 27: # close window if user presses their esc key.
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+```
+
+The above code will open a new window titled "Webcam" and you will be able to see video output from the webcam. Press the
+esc key to close this window and stop running the program.
+
+## Detecting when the LED is on
+
+In the code above, I've converted the video into gray scale. That means each pixel in the video will have a value between 0 and 255. The grayVideo variable holds a matrix of the values
+of each pixel. If I average this entire matrix, I will have an estimate for the average brightness of the video.
+
+```py
+
+cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+while True:
+
+    ret,video = cap.read()
+    grayVideo = cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
+    cv2.imshow('Webcam', grayVideo)
+
+    print(grayVideo.mean()) # print average brightness
+
+    if cv2.waitKey(1) & 0xFF == 27: # close window if user presses their esc key.
+        break
+
+cap.release()
+cv2.destroyAllWindows()
+```
+
+<img src="/static/images/webcam/webcamopencv1.gif" loading="lazy" />
+
+As we can see in the above gif, when the LED is turned off we get a brightness value around 0. When the LED is on, we get a value of 37. This value is relative to how bright or dark
+your testing environment is. When I initially tested the script, I got a value around 60 when the LED was turned on. In order to detect when the LED is on or off, I'm going to average
+the brightness values when it was on and when it was off. Since the average of 60 and 0 is 30, I'm going to check when I receive a brightness value greater than 30. When this value is greater
+than 30, I know that the webcam has detected the LED to be on. I chose the average of these values in order to get a more conservative estimate.
+
+## LED and Webcam Timing
+
+I want the time at which I turned on the LED and the time when the webcam detected the LED. Once I have these times, I can get the difference and find the average in order to find the webcam latency.
+I'm just going to use the time.perf_counter() function to retrieve the current time and append it to an array for the LED times and the capture times, respectively. To summarize, once I turn the LED on
+I will record the time and append it to an array called LEDtimes. Once the webcam detects the LED to be on, I will record the time and append it to an array called captureTimes. Afterwards, I will subtract
+(element-wise) the LEDtimes and the captureTimes array and then average the result to get the latency. Here's the final code.
+
+```py
+from threading import Thread
+import serial
+import time
+import time
+import cv2
+from numpy import mean, subtract
+
+ser = serial.Serial('COM4', 9600)
+LEDtimes = []
+
+def LEDLoop():
+    count = 0
+    time.sleep(10)
+    while True:
+        ser.write(b'H')
+        realOnTime = time.perf_counter()
+        LEDtimes.append(realOnTime)
+        time.sleep(1)
+        ser.write(b'L')
+        time.sleep(1)
+        if count >= 99:
+            return LEDtimes
+        else:
+            count = count+ 1
+
+
+captureTimes = []
+
+def webcam():
+    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) # 640
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)) # 480
+
+    bAverage = []
+
+    count = 0
+    i = 0
+    while True:
+
+        ret,video = cap.read()
+        grayVideo = cv2.cvtColor(video, cv2.COLOR_BGR2GRAY)
+        cv2.imshow('Nexigo Webcam', grayVideo)
+
+        bAverage.append(grayVideo.mean())
+        print(grayVideo.mean())
+        if bAverage[i-1]:
+            if ((bAverage[i] >= 30) and (bAverage[i-1] < 30)):
+                # LED on detected
+                count = count + 1
+                onTime = time.perf_counter()
+                captureTimes.append(onTime)
+
+        i = i + 1
+
+        if cv2.waitKey(1) & 0xFF == 27:
+            break
+
+    print("mean: ", mean(bAverage))
+    print("count: ", count)
+    cap.release()
+    cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    a = Thread(target = LEDLoop)
+    b = Thread(target = webcam)
+    a.start()
+    b.start()
+    a.join()
+    b.join()
+
+    print("latency: ", round(mean(subtract(captureTimes, LEDtimes)),2)*1000, " ms")
+```
+
+I'm using Python's multithreading library to wrote both of the functions concurrently. Using the above code, I ended up getting a latency of 140 milliseconds for this webcam.
