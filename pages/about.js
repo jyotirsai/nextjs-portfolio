@@ -20,13 +20,12 @@ export default function About() {
           <div className="pt-8 pb-8 prose dark:prose-dark max-w-none xl:col-span-2">
             <p>
               Hi, I'm an engineering student at the University of Alberta. I like to blog about
-              projects I'm working on, and things I'm learning. My interests include robotics, CAD,
-              and programming.
+              projects I'm working on, and things I'm learning. My interests include robotics,
+              programming, and more.
             </p>
             <p>
-              Currently, I am a 4th year co-op student looking for a 4-month internship in Fall
-              2021. I am interested in finding a technical role in the field of robotics and/or
-              mechatronics.
+              I am currently in my last year of engineering. I would like to find a technical role
+              where I can learn more about making robotics/mechatronics/software development.
             </p>
             <p>
               I have completed prior internships in industry and have been previously employed as a
