@@ -25,7 +25,7 @@ export default function About() {
             </p>
             <p>
               I am currently in my last year of engineering. I would like to find a technical role
-              where I can learn more about making robotics/mechatronics/software development.
+              where I can learn more about robotics / mechatronics / software development.
             </p>
             <p>
               I have completed prior internships in industry and have been previously employed as a

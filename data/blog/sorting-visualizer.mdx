@@ -1,0 +1,142 @@
+---
+title: Sorting Algorithms Visualization
+date: '2022-01-03'
+tags: ['Programming', 'JavaScript']
+draft: false
+summary: A visualization of a few sorting algorithms made with vanilla JavaScript.
+---
+
+I made a sorting algorithm visualizer that animates the sorting of four popular sorting algorithms. The algorithms include Bubble sort,
+Insertion sort, Selection sort, and Merge sort.
+Check out the live website <a href="https://upbeat-golick-77a6b1.netlify.app/" target="_blank">here</a>.
+
+The rest of this blog post will give a brief summary of how it was made. As an example, I'll go over how I implemented insertion sort. I tried to keep the code as simple as
+possible, therefore I only have 3 JavaScript files along with an HTML and CSS file. The HTML file includes all the buttons that the user can select and the div that contains the
+rectangles. The rectangles themselves are just div's that are generated via the main.js file. The first line in the main.js file waits for the website to load and then calls the
+generateArray() function.
+
+```JavaScript
+document.addEventListener("DOMContentLoaded", generateArray(), false);
+```
+
+The generateArray() function is used to randomly generate 50 rectangles with differing heights.
+
+```JavaScript
+function generateArray() {
+  const arrays = document.getElementById("arrays"); // retrieve parent div of rectangles
+  arrays.innerHTML = ""; // clear any div children within arrays
+
+  for (let i = 0; i < 50; i++) {
+    const rectangle = document.createElement("div"); // create a div element which will represent each rectangle
+    rectangle.id = "rectangle"; // set id
+    rectangle.classList.add("default"); // add css class
+    const height = Math.floor(Math.random() * 500); // generate random size for rectangle
+    rectangle.style.height = height + "px"; // add previously generated size to height properties of style
+    arrays.appendChild(rectangle); // add div to arrays parent div
+  }
+}
+```
+
+Now, let's go over how insertion sort is implemented. There are three JavaScript files: main.js, algorithms.js, and helpers.js. In the main.js file, I have the following
+function for insertion sort which runs when the insertion sort button is clicked.
+
+```JavaScript
+async function insertionSort() {
+  await disableButtons(); // disable all buttons so they cannot be clicked
+  let algorithms = new Algorithms();
+  await algorithms.InsertionSort();
+  await enableButtons(); // enable all buttons again after sorting
+}
+```
+
+In the function, I create a new Algorithms object and then call the InsertionSort method. Inside the algorithms.js file, I have the Algorithms class where all the algorithms
+are defined.
+
+```JavaScript
+class Algorithms {
+    constructor() {
+        this.arrays = document.getElementById("arrays"); // parent div of all rectangles
+        this.rectangles = this.arrays.children; // rectangle divs inside arrays div
+        this.size = this.rectangles.length; // number of rectangles
+        this.helpers = new Helpers(this.rectangles); // helper functions
+        this.speed = document.getElementById("speed").value;
+    }
+
+    // Insertion Sort
+    async InsertionSort() {
+        for (let i = 1; i < this.size; i++) {
+            let j = i - 1;
+            let key = i;
+
+            while (j >= 0 && (await this.helpers.compareElements(j, key))) {
+                await this.helpers.setCurrent(j);
+                await this.helpers.swapElements(key, j);
+
+                await this.helpers.delay(this.speed);
+
+                await this.helpers.removeCurrent(j);
+                j--;
+                key--;
+            }
+        }
+    }
+}
+
+```
+
+In the constructor, I've defined variables that are required in all the different algorithm implementations. I also instantiate a Helper object which includes functionality
+such as highlighing a rectangle, comparing two rectangles, and swapping them.
+
+In insertion sort, I have an element which I label as key and use to compare with the previous element. In the above for loop, my i variable starts at 1 (the second element) which I
+then set equal to my key variable. The j variable represents the previous element. I compare the key with the previous element and if the key is smaller, I swap the elements. Using the
+while loop, I then continue to compare the key with the previous element and if the key is smaller again, I again swap the elements. I continue to do this until either the previous element
+is equal to the first element in the array, or the previous element is smaller than the key. I use the compareElements helper function to compare the key with the previous element j.
+
+```JavaScript
+  // compare the heights of 2 different rectangles
+  async compareElements(i, j) {
+    let height1 = Number(this.rectangles[i].style.height.match(/(\d+)/)[0]);
+    let height2 = Number(this.rectangles[j].style.height.match(/(\d+)/)[0]);
+    if (height1 > height2) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+```
+
+If the previous element is larger, then the swapElements function is called.
+
+```JavaScript
+  // swap the height values of two elements
+  async swapElements(i, j) {
+    let height1 = Number(this.rectangles[i].style.height.match(/(\d+)/)[0]);
+    let height2 = Number(this.rectangles[j].style.height.match(/(\d+)/)[0]);
+    this.rectangles[i].style.height = height2 + "px";
+    this.rectangles[j].style.height = height1 + "px";
+  }
+```
+
+The last part of the visualization is the actual animation component. This component is quite basic and involves called the setCurrent function which removes the default css
+class and adds a different css class.
+
+```JavaScript
+  async setCurrent(i) {
+    this.rectangles[i].classList.remove("default");
+    this.rectangles[i].classList.add("current");
+  }
+```
+
+The removeCurrent method does the opposite of the setCurrent method. In order to actually see the rectangle change color, I use the delay helper function. The delay function
+uses the built-in setTimeout function to resolve a promise after a certain number of milliseconds.
+
+```JavaScript
+// delay for animation
+  async delay(time) {
+    await new Promise((resolve) => setTimeout(resolve, time)); // wait for animation
+  }
+```
+
+The time value is set by the user using the slider. Now, let's take a look at insertion sort in action. The full code is available on my <a href="https://github.com/jyotirsai/sorting-visualizer" target="_blank">github.</a>
+
+<img src="/static/images/insertionSort.gif" loading="lazy" />

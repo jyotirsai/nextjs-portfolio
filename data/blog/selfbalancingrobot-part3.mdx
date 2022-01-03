@@ -1,0 +1,322 @@
+---
+title: 'Self-Balancing Robot Part 3: Kalman Filter'
+date: '2021-10-24'
+tags: ['Robotics', 'Engineering', 'Programming']
+draft: true
+summary: Part 3 of this series will go over retrieving gyroscope data and using a Kalman filter for a better position estimate.
+---
+
+<i>
+  This is the 3rd part of my self-balancing robot series. In part 1 I go over its physics and using
+  an IMU to detect angles. Part 2 goes over motor control and a preliminary control algorithm.
+</i>
+
+In part 1 of this blog series, I detailed how to retrieve accelerometer data from an MPU6050 inertial measurement unit. The accelerometer measures the components of gravity acting on each x,y, and z axis.
+It also assumes that gravity is the only force acting on it. Therefore, when we apply a force on the robot to make it move, the accelerometer data becomes noisy and less accurate. To make up for this, we can
+use the IMU's gyroscope to retrieve a more accurate estimate of position. The gyroscope measures angular rotation in degrees per second so if we multiply this value by the time between
+measurements we get a position in degrees. Unfortunately, gyroscopes tend to be prone to drift and will become more inaccurate over time. Therefore, we will use a Kalman Filter to combine the readings
+from the accelerometer as well as the gyroscope.
+
+## Reading Angles from the Gyroscope
+
+The current iteration of the mpu class is as follows:
+
+```cpp
+// mpu.h
+class mpu {
+    public:
+        void init(); // initializes mpu
+        void retrieveData(); // retrieves raw accelerometer data
+        void processData(); // processes raw accelerometer data
+
+    public:
+        double ax_raw, ay_raw, az_raw; // store raw accelerometer data
+        double ax_g, ay_g, az_g; // stores g-forces
+        double angleX, angleY, angleZ; // stores angles
+};
+```
+
+```cpp
+// mpu.cpp
+#include <Arduino.h> // This enables us to use the arduino library in the cpp file
+#include "mpu.h"
+#include <Wire.h> // for I2C communication
+
+void mpu::init(){
+    // initialize mpu parameters
+    Wire.beginTransmission(0b1101000); // Start communicating with I2C address of MPU
+    Wire.write(0b1101011); // Access the 0x6B power management register
+    Wire.write(0b00000000); // Set all parameters in register to 0
+    Wire.endTransmission();
+    Wire.beginTransmission(0b1101000);
+    Wire.write(0b11100); // Access the 0x1C accelerometer register
+    Wire.write(0b00000000); // set all bits to 0, bit 4 and 3 are set to 0 for 2g acceleration
+    Wire.endTransmission();
+};
+
+void mpu::retrieveData(){
+    Wire.beginTransmission(0b1101000);
+    Wire.write(0b111011); // This is the starting register for accelerometer measurements (0x3B)
+    Wire.endTransmission();
+    Wire.requestFrom(0b1101000, 6); // read the 6 registers
+    ax_raw = (Wire.read() << 8 | Wire.read()); // bit shifting, first two bytes are stored in ax (x-component acceleration)
+    ay_raw = (Wire.read() << 8 | Wire.read()); // third and fourth bytes are stored in ay (y-component acceleration)
+    az_raw = (Wire.read() << 8 | Wire.read()); // fifth and sixth bytes are stored in az (z-component acceleration)
+};
+
+void mpu::processData(){
+    ax_g = ax_raw / 16384;
+    ay_g = ay_raw / 16384;
+    az_g = az_raw / 16384;
+    angleX = atan(ax_g, sqrt(pow(ay_g, 2)+pow(az_g,2)))*180/PI; // acceleration in g is converted to angles in degrees
+    angleY = atan(ay_g, sqrt(pow(ax_g, 2)+pow(az_g,2)))*180/PI;
+    angleZ = atan(az_g, sqrt(pow(ay_g, 2)+pow(ax_g,2)))*180/PI;
+}
+```
+
+This code is available on my <a href="https://github.com/jyotirsai/self-balancing-robot">github</a>
+
+On the MPU6050, register 27 corresponds to the gyroscope. In the init() function of our mpu class, let's add communication with the gyroscope.
+
+```cpp
+// mpu.cpp
+#include <Arduino.h> // This enables us to use the arduino library in the cpp file
+#include "mpu.h"
+#include <Wire.h> // for I2C communication
+
+void mpu::init(){
+    // initialize mpu parameters
+    Wire.beginTransmission(0b1101000); // Start communicating with I2C address of MPU
+    Wire.write(0b1101011); // Access the 0x6B power management register
+    Wire.write(0b00000000); // Set all parameters in register to 0
+    Wire.endTransmission();
+    Wire.beginTransmission(0b1101000);
+    Wire.write(0b11100); // Access the 0x1C accelerometer register
+    Wire.write(0b00000000); // set all bits to 0, bit 4 and 3 are set to 0 for 2g acceleration
+    Wire.endTransmission();
+    Wire.beginTransmission(0b1101000);
+    Wire.write(0b11011); // Access the 0x1B gyroscope register
+    Wire.write(0b00000000) // bits 2-0 are reserved, set bit 4 and 3 to 0 for 250 degrees/second range
+    Wire.endTransmission();
+};
+
+```
+
+In the mpu.h header file, let's add the variables that will store the raw values coming in from the gyroscope.
+
+```cpp
+// mpu.h
+class mpu {
+    public:
+        void init();
+        void retrieveData();
+        void processData();
+
+    public:
+        double ax_raw, ay_raw, az_raw; // store raw accelerometer data
+        double ax_g, ay_g, az_g; // stores g-forces
+        double angleX, angleY, angleZ; // stores angle
+        double gx_raw, gy_raw, gz_raw; // store raw gyroscope data
+};
+
+```
+
+Now we will update the retrieveData() function.
+
+```cpp
+// mpu.cpp
+void mpu::retrieveData(){
+    Wire.beginTransmission(0b1101000);
+    Wire.write(0b111011); // This is the starting register for accelerometer measurements (0x3B)
+    Wire.endTransmission();
+    Wire.requestFrom(0b1101000, 6); // read the 6 registers
+    ax_raw = (Wire.read() << 8 | Wire.read()); // bit shifting, first two bytes are stored in ax (x-component acceleration)
+    ay_raw = (Wire.read() << 8 | Wire.read()); // third and fourth bytes are stored in ay (y-component acceleration)
+    az_raw = (Wire.read() << 8 | Wire.read()); // fifth and sixth bytes are stored in az (z-component acceleration)
+
+    Wire.beginTransmission(0b1101000);
+    Wire.write(0b1000011); // This is the starting register for the gyroscope measurments (0x43)
+    Wire.endTransmission();
+    Wire.requestFrom(0b1101000, 6); // read the 6 registers
+    gx_raw = (Wire.read() << 8 | Wire.read()); // bit shifting, first two bytes are stored in gx (x-component rotation)
+    gy_raw = (Wire.read() << 8 | Wire.read()); // third and fourth bytes are stored in ay (y-component rotation)
+    gz_raw = (Wire.read() << 8 | Wire.read()); // fifth and sixth bytes are stored in az (z-component rotation)
+
+};
+```
+
+The raw gyroscope values coming in from the gyroscope are now stored in gx_raw, gy_raw, and gz_raw. These numbers need to be converted to degrees/second in order to make sense.
+In the above code, we selected a full scale range of 250 degrees/second which corresponds to 131 LSB/(degrees/second). To convert our reading into degrees/second, we will need to
+divide the raw values by 131. I will add corresponding variables in the mpu.h file.
+
+```cpp
+// mpu.h
+class mpu {
+    public:
+        void init();
+        void retrieveData();
+        void processData();
+
+    public:
+        double ax_raw, ay_raw, az_raw; // store raw accelerometer data
+        double ax_g, ay_g, az_g; // stores g-forces
+        double angleX, angleY, angleZ; // stores angle
+        double gx_raw, gy_raw, gz_raw; // store raw gyroscope data
+        double gx_ds, gy_ds, gz_ds; // stores gyro data in deg/s
+};
+
+```
+
+```cpp
+// mpu.cpp
+void mpu::processData(){
+    ax_g = ax_raw / 16384;
+    ay_g = ay_raw / 16384;
+    az_g = az_raw / 16384;
+    angleX = atan(ax_g, sqrt(pow(ay_g, 2)+pow(az_g,2)))*180/PI; // acceleration in g is converted to angles in degrees
+    angleY = atan(ay_g, sqrt(pow(ax_g, 2)+pow(az_g,2)))*180/PI;
+    angleZ = atan(az_g, sqrt(pow(ay_g, 2)+pow(ax_g,2)))*180/PI;
+    gx_ds = gx_raw / 131;
+    gy_ds = gy_raw / 131;
+    gz_ds = gz_raw / 131;
+}
+```
+
+Now, I will open up the Arduino IDE and add the following:
+
+```cpp
+#include "mpu.h"
+
+mpu mpu; // instantiate mpu class
+
+void setup() {
+    mpu.init();
+    Serial.begin(9600); // set baud rate for our serial monitor
+
+}
+
+void loop() {
+    mpu.retrieveData();
+    Serial.print(" gx (deg/s):  ");
+    Serial.print(mpu.gx_ds);
+    Serial.print(" gy (deg/s):  ");
+    Serial.print(mpu.gy_ds);
+    Serial.print(" gz (deg/s):  ");
+    Serial.println(mpu.gz_ds);
+}
+```
+
+## [PICTURE HERE]
+
+Right now I have the gyroscope data in degrees/second but I actually want it in degrees so I can fuse it with the angles from the accelerometer. I will use the seconds between
+each loop and use it to multiply the gyroscope data so I have degrees. I'm going to add the variables I need in the mpu.h file.
+
+```cpp
+// mpu.h
+class mpu {
+    public:
+        void init();
+        void retrieveData();
+        void processData();
+
+    public:
+        double ax_raw, ay_raw, az_raw; // store raw accelerometer data
+        double ax_g, ay_g, az_g; // stores g-forces
+        double angleX, angleY, angleZ; // stores angle
+        double gx_raw, gy_raw, gz_raw; // store raw gyroscope data
+        double gx_ds, gy_ds, gz_ds; // stores gyro data in deg/s
+        float previousTime, currentTime, deltaTime; // need this to find time between loop readings
+};
+
+```
+
+The deltaTime variable is the time difference that will be used to multiply the gyro data.
+
+```cpp
+// mpu.cpp
+void mpu::processData(){
+    ax_g = ax_raw / 16384;
+    ay_g = ay_raw / 16384;
+    az_g = az_raw / 16384;
+    angleX = atan(ax_g, sqrt(pow(ay_g, 2)+pow(az_g,2)))*180/PI; // acceleration in g is converted to angles in degrees
+    angleY = atan(ay_g, sqrt(pow(ax_g, 2)+pow(az_g,2)))*180/PI;
+    angleZ = atan(az_g, sqrt(pow(ay_g, 2)+pow(ax_g,2)))*180/PI;
+    gx_ds = gx_raw / 131;
+    gy_ds = gy_raw / 131;
+    gz_ds = gz_raw / 131;
+    gAngleX = gx_ds*deltaTime; // angle data from gyroscope converted to degrees
+    gAngleY = gy_ds*deltaTime;
+    gAngleZ = gz_ds*deltaTime;
+}
+```
+
+Now we will update the mpu.cpp file to calculate the time difference and show our angle readings.
+
+```cpp
+#include "mpu.h"
+
+mpu mpu; // instantiate mpu class
+
+void setup() {
+    mpu.init();
+    Serial.begin(9600); // set baud rate for our serial monitor
+    mpu.previousTime = 0;
+}
+
+void loop() {
+    mpu.currentTime = millis();
+    mpu.deltaTime = mpu.currentTime - mpu.previousTime;
+    mpu.previousTime = mpu.currentTime;
+    mpu.retrieveData();
+    Serial.print(" gx (deg):  ");
+    Serial.print(mpu.gAngleX);
+    Serial.print(" gy (deg):  ");
+    Serial.print(mpu.gAngleY);
+    Serial.print(" gz (deg):  ");
+    Serial.println(mpu.gAngleZ);
+}
+```
+
+## [PICTURE #2 HERE]
+
+## Kalman Filter
+
+A Kalman filter is a prediction-correction algorithm that can be used to fuse noisy / drifting data measurements into a more accurate estimate. This more accurate estimate (or state), $\mathbf{\bar{x}_{k}}$, is
+accompanied by the covariance matrix, $\mathbf{\bar{P}_{k}}$. The equations for the state and covariance are:
+
+$$
+{x}_{k} = F_{k} {x}_{k-1}+B_{k} u_{k}+w_{k}
+$$
+
+$$
+{P}_{k} = F_{k} P_{k-1}F_{k}^{T} + Q_{k}
+$$
+
+Where $F_{k}$ is the state transition model, $B_{k}$ is the control input model, $u_{k}$ is the control input, $w_{k}$ is the process noise, $Q_{k}$ is the covariance of process noise.
+$F_{k}$ and $B_{k}$can be easily derived for this case using kinematics and is equal to the following:
+
+$$
+F_{k} = \begin{bmatrix} 1 & \Delta t \\ 0 & 1 \end{bmatrix}
+$$
+
+$$
+B_{k} = \begin{bmatrix} \Delta t \\ 0 \end{bmatrix}
+$$
+
+$u_{k}$ is the control input which in our case is the angular rate, $\dot{\theta}$, since that is what we're controlling. The process noise is assumed to have zero mean with a Gaussian distribution
+and covariance equal to $Q_{k}$.
+
+The measurement of the true state is equal to:
+
+$$
+z_{k} = H_{k} x_{k} + v_{k}
+$$
+
+$H_{k}$ is the observation model used to map the true state and measurement state. The observation noise, $v_{k}$, is also assumed to have zero mean with a Gaussian distribution with covariance $R_{k}$.
+The difference between the measurement, $z_{k}$, and the previous state, $x_{k-1}$, is called the innovation and is equal to:
+
+$$
+y_{k} = z_{k}-Hx_{k-1}
+$$
+
+The innovation covariance
