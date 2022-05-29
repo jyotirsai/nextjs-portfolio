@@ -19,7 +19,7 @@ export default function About() {
         <div className="items-start space-y-2 xl:grid xl:grid-cols-2 xl:gap-x-8 xl:space-y-0">
           <div className="pt-8 pb-8 prose dark:prose-dark max-w-none xl:col-span-2">
             <p>
-              Hi, I'm a Software Engineering Graduate at the University of Alberta. I like to blog about
+              Hi, I'm a Software Engineering Graduate student at the University of Alberta. I like to blog about
               projects I'm working on, and things I'm learning. My interests include software development, AI/ML, and robotics.
             </p>
             <p>
