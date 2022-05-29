@@ -19,13 +19,12 @@ export default function About() {
         <div className="items-start space-y-2 xl:grid xl:grid-cols-2 xl:gap-x-8 xl:space-y-0">
           <div className="pt-8 pb-8 prose dark:prose-dark max-w-none xl:col-span-2">
             <p>
-              Hi, I'm an engineering student at the University of Alberta. I like to blog about
-              projects I'm working on, and things I'm learning. My interests include robotics,
-              programming, and more.
+              Hi, I'm a Software Engineering Graduate at the University of Alberta. I like to blog about
+              projects I'm working on, and things I'm learning. My interests include software development, AI/ML, and robotics.
             </p>
             <p>
-              I am currently in my last year of engineering. I would like to find a technical role
-              where I can learn more about robotics / mechatronics / software development.
+              I am currently an incoming Master's student in Software Engineering & Intelligent Systems. I would like to find a technical role
+              where I can learn more about software development practices.
             </p>
             <p>
               I have completed prior internships in industry and have been previously employed as a
